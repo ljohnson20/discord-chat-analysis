@@ -5,7 +5,6 @@ import sys
 import emoji
 import pytz
 import dateutil.parser
-from collections import Counter
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.tokenize import MWETokenizer
