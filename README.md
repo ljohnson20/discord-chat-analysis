@@ -56,9 +56,13 @@ CSV/JSON output option
 
 Get system timezone
 
+Reaction/emoji fix. Currently relying on reaction emojis to match with message
+emojis. If emoji isn't used as a reaction won't have image to download
+
 ### Graphics
 Utilize avatar pictures in report
 
 Export popular files/links
 
 Different chart options
+Overload graphing method?

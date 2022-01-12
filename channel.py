@@ -1,6 +1,8 @@
 from typing import List
 from datetime import datetime
 from user import User
+from reaction import Emoji
+from collections import Counter
 
 class Channel:
 
@@ -18,9 +20,9 @@ class Channel:
                 return user
         return None
 
-    @property
-    def usernames(self) -> List[datetime]:
-        return [user.name for user in self.users]
+
+    # Maybe return actual Counter objects
+    # Use Counter.update or c['user'] = value
 
     @property
     def timestamps(self) -> List[datetime]:
@@ -35,17 +37,15 @@ class Channel:
         return sum([user.emojis for user in self.users], [])
 
     @property
-    def reactions(self):
+    def reactions(self) -> List[Emoji]:
         return sum([user.reactions for user in self.users], [])
 
     @property
     def mentions(self) -> List[str]:
         return sum([user.mentions for user in self.users], [])
-
-    @property
-    def user_message_count(self) -> List:
-        return [user.message_count for user in self.users]
     
     def user_message_counter(self) -> List[tuple]:
-        return sorted(list(zip(self.usernames, self.user_message_count)), 
-                      key=lambda x: x[1], reverse=True)
+        return_count = Counter()
+        for user in self.users:
+            return_count[user.name] = user.message_count
+        return return_count

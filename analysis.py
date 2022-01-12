@@ -15,6 +15,8 @@ from config import *
 import re
 from channel import Channel
 from user import User
+from reaction import Emoji
+from plotter import Plotter
 
 # NLTK setup
 # nltk.download('popular')
@@ -63,34 +65,37 @@ for message in data["messages"]:
     if not message["author"]["isBot"]:
         timestamp = dateutil.parser.parse(message["timestamp"])
         if args.start_date < timestamp.astimezone(local_tz) < args.end_date:
-            main_channel.timestamps.append(timestamp.astimezone(local_tz))
             user = main_channel.get_user(message["author"]["id"])
             if not user:
                 user = User(message["author"]["id"], message["author"]["name"], 
                             message["author"]["nickname"], message["author"]["avatarUrl"])
                 main_channel.users.append(user)
             
+            # Basic message info
+            user.timestamps.append(timestamp.astimezone(local_tz))
             user.message_count += 1
+            if message["timestampEdited"]:
+                user.edit_count += 1
+            
             # Remove hyperlinks and then split message
-            tokens = fixer.tokenize(word_tokenize(re.sub(r'http\S+', '', message["content"])))
+            tokens = re.sub(r'http\S+', '', message["content"]).split()
             # Grabbing emojies
             user.emojis += [w for w in tokens if re.match("<?:.*:.*>?", emoji.demojize(w)) is not None]
-            # convert to lower case and trim multi-letters
-            tokens = [re.sub(r'(.)\1{2,}', r'\1', w.lower()) for w in tokens]
-
-            # Remove hyperlinks from text
-            # 
-
+            # Skipping emojis and convert remaining words to lower case and trim multi-letters (3+)
+            tokens = [re.sub(r'(.)\1{2,}', r'\1', w.lower()) for w in tokens if w not in user.emojis]
             # Remove remaining tokens that are not alphabetic or stop word
             words = [word for word in tokens if word.isalpha() and not word in stop_words]
             # Stem words
             words = [porter.stem(word) for word in words]
 
             user.words += words
+
+            # Storing mentions
+            user.mentions += [mention["id"] for mention in message["mentions"]]
+
+            # Storing reactions
+            for reaction in message["reactions"]:
+                message_react = Emoji(reaction["emoji"]["id"], reaction["emoji"]["name"], reaction["emoji"]["imageUrl"]) 
+                user.reactions += [message_react for _ in range(reaction["count"])]
  
-# time_counter = Counter(all_times)
-word_counter = Counter(main_channel.words)
-emoji_counter = Counter(main_channel.emojis)
-print(word_counter.most_common(10))
-print(emoji_counter.most_common(5))
 print(main_channel.user_message_counter())
