@@ -99,3 +99,7 @@ for message in data["messages"]:
                 user.reactions += [message_react for _ in range(reaction["count"])]
  
 print(main_channel.user_message_counter())
+
+plots = Plotter()
+plots.bar_graph([timestamp.weekday() for timestamp in main_channel.timestamps],
+                title="Messages per day")
